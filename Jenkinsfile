@@ -134,11 +134,19 @@ pipeline {
             agent {
                 docker {
                     image 'bitnami/kubectl:latest'
-                    args "--entrypoint='' --user 0 --network host -v /home/jjaramillo/.kube:/root/.kube"
+                    // Añadimos --add-host para que el contenedor sepa quién es host.docker.internal
+                    args "--entrypoint='' --user 0 --network host --add-host=host.docker.internal:host-gateway -v /home/jjaramillo/.kube:/root/.kube"
                 }
             }
             steps {
                 script {
+                    // 1. Forzamos a que use el archivo config que montamos
+                    env.KUBECONFIG = '/root/.kube/config'
+
+                    // 2. Re-apuntamos al puerto que obtuviste (55593) usando la URL de Docker Desktop
+                    sh "kubectl config set-cluster docker-desktop --server=https://host.docker.internal:55593 --insecure-skip-tls-verify"
+                    
+                    // 3. Verificamos contexto y ejecutamos
                     sh 'kubectl config current-context'
                     sh "kubectl set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo"
                 }
