@@ -17,12 +17,14 @@ pipeline {
 
         stage('Install dependencies') {
             steps {
-                sh """
-                docker run --rm \
-                -v $WORKSPACE:/app \
-                -w /app \
-                node:20 npm install
-                """
+                dir("${env.WORKSPACE}") {
+                    sh """
+                    docker run --rm \
+                    -v \$(pwd):/app \
+                    -w /app \
+                    node:20 npm install
+                    """
+                }
             }
         }
 
