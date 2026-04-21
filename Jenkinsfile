@@ -97,13 +97,13 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    // Ejecutamos kubectl a través de un contenedor efímero para no ensuciar el Jenkins
-                    // Compartimos el .kube config y el workspace para acceder al kubernetes.yaml
+                    // Usamos la ruta absoluta que Jenkins ve en el host para el montaje
                     sh """
                     docker run --rm \
+                        --user 0 \
                         -v /home/jjaramillo/.kube:/root/.kube \
-                        -v ${WORKSPACE}:/app \
-                        -w /app \
+                        -v /var/jenkins_home/workspace/curso-devops-lab3:/workspace \
+                        -w /workspace \
                         --network host \
                         --add-host=host.docker.internal:host-gateway \
                         bitnami/kubectl:latest \
@@ -111,6 +111,7 @@ pipeline {
                         apply -f kubernetes.yaml
                     
                     docker run --rm \
+                        --user 0 \
                         -v /home/jjaramillo/.kube:/root/.kube \
                         --network host \
                         --add-host=host.docker.internal:host-gateway \
