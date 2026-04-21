@@ -61,7 +61,7 @@ pipeline {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
                             docker run --name sonar_scanner_tmp \
-                                -e SONAR_HOST_URL=http://host.docker.internal:9000 \
+                                -e SONAR_HOST_URL=http://host.docker.internal:8084 \
                                 -e SONAR_TOKEN=${SONAR_TOKEN} \
                                 -v ${WORKSPACE}:/usr/src \
                                 sonarsource/sonar-scanner-cli \
