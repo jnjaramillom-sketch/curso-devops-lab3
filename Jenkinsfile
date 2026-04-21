@@ -134,13 +134,14 @@ pipeline {
             agent {
                 docker {
                     image 'bitnami/kubectl:latest'
-                    // Added --entrypoint='' to allow Jenkins to control the container
-                    args '--entrypoint="" --user 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
+                    // Añadimos el mapeo del host para que resuelva correctamente
+                    args '--network host --add-host=host.docker.internal:host-gateway -v /home/jjaramillo/.kube:/root/.kube'
                 }
             }
             steps {
-                // Updated to version 1.0.52 as seen in your logs
-                sh "kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${VERSION} -n jjaramillo"
+                // Usamos --validate=false o revisamos la conexión primero
+                sh 'kubectl cluster-info' 
+                sh 'kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.55 -n jjaramillo'
             }
         }
     }
