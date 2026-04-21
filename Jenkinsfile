@@ -131,16 +131,9 @@ pipeline {
         }
 
         stage('Deploy Kubernetes') {
-            agent {
-                docker {
-                    image 'bitnami/kubectl:latest'
-                    // Añadimos --entrypoint='' para permitir que Jenkins ejecute sus scripts
-                    args '-u 0 --entrypoint="" --network host -v /home/jjaramillo/.kube:/root/.kube'
-                }
-            }
             steps {
-                // Asegúrate de usar comillas dobles para que las variables de Jenkins se expandan
-                sh "kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.49 -n jjaramillo"
+                // Usamos la versión 1.0.50 que es la que acabas de subir satisfactoriamente
+                sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.50 -n jjaramillo"
             }
         }
     }
