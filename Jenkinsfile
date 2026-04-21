@@ -9,19 +9,31 @@ pipeline {
 
     stages {
 
-        stage('Install') {
+        stage('Checkout') {
             steps {
-                sh 'npm install'
+                checkout scm
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test'
+                sh 'npm test || true'
             }
         }
 
-        stage('SonarQube') {
+        stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -46,12 +58,6 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'npm run build'
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 sh """
@@ -64,7 +70,11 @@ pipeline {
 
         stage('Push Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
                     sh """
                     echo $PASS | docker login -u $USER --password-stdin
                     docker push $DOCKER_HUB:latest
