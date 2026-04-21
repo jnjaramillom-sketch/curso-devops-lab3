@@ -97,27 +97,27 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    // Usamos la ruta absoluta que Jenkins ve en el host para el montaje
+                    // 1. Aplicamos el YAML pasándole el contenido por 'stdin' con '-'
+                    // Usamos la bandera -i en docker run para que acepte la entrada
+                    sh """
+                    cat kubernetes.yaml | docker run --rm -i \
+                        -v /home/jjaramillo/.kube:/root/.kube \
+                        --network host \
+                        --add-host=host.docker.internal:host-gateway \
+                        bitnami/kubectl:latest \
+                        --insecure-skip-tls-verify \
+                        apply -f -
+                    """
+
+                    // 2. Actualizamos la imagen a la versión específica que acabamos de buildear
                     sh """
                     docker run --rm \
-                        --user 0 \
-                        -v /home/jjaramillo/.kube:/root/.kube \
-                        -v /var/jenkins_home/workspace/curso-devops-lab3:/workspace \
-                        -w /workspace \
-                        --network host \
-                        --add-host=host.docker.internal:host-gateway \
-                        bitnami/kubectl:latest \
-                        --insecure-skip-tls-verify \
-                        apply -f kubernetes.yaml
-                    
-                    docker run --rm \
-                        --user 0 \
                         -v /home/jjaramillo/.kube:/root/.kube \
                         --network host \
                         --add-host=host.docker.internal:host-gateway \
                         bitnami/kubectl:latest \
                         --insecure-skip-tls-verify \
-                        set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo
+                        set image deployment/app-deployment app=${GHCR}:${VERSION} -n jjaramillo
                     """
                 }
             }
