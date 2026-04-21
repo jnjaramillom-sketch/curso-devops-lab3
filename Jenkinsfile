@@ -131,9 +131,18 @@ pipeline {
         }
 
         stage('Deploy Kubernetes') {
+            agent {
+                docker {
+                    image 'bitnami/kubectl:latest'
+                    // Mounting the kubeconfig updated with the WSL IP
+                    args '--user 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
+                }
+            }
             steps {
-                // Usamos la versión 1.0.50 que es la que acabas de subir satisfactoriamente
-                sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.50 -n jjaramillo"
+                script {
+                    // Using version 1.0.51 from your successful build
+                    sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.51 -n jjaramillo"
+                }
             }
         }
     }
