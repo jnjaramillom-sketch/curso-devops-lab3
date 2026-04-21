@@ -140,7 +140,7 @@ pipeline {
             }
             steps {
                 // Updated to version 1.0.52 as seen in your logs
-                sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.52 -n jjaramillo"
+                sh "kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${VERSION} -n jjaramillo"
             }
         }
     }
