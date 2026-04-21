@@ -21,7 +21,7 @@ pipeline {
                 docker run --rm \
                     -v $PWD:/app \
                     -w /app \
-                    node:20 npm ci
+                    node:20 npm install
                 """
             }
         }
