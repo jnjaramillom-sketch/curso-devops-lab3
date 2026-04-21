@@ -82,9 +82,10 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
+        stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
+                    // Jenkins usará la URL que configuramos arriba para preguntar el estado
                     waitForQualityGate abortPipeline: true
                 }
             }
