@@ -55,22 +55,27 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Limpiamos cualquier rastro anterior desde el host
-                    sh "rm -rf .scannerwork && mkdir -p .scannerwork && chmod 777 .scannerwork"
-                    
                     withSonarQubeEnv('sonar-server') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            // 1. Ejecutamos el scanner pero SIN mapear volúmenes de escritura.
+                            // Usamos una carpeta interna del contenedor para todo.
                             sh """
-                            docker run --rm \
+                            docker run --name sonar_scanner_tmp \
                                 -e SONAR_HOST_URL=http://host.docker.internal:9000 \
                                 -e SONAR_TOKEN=$SONAR_TOKEN \
                                 -v ${WORKSPACE}:/usr/src \
                                 sonarsource/sonar-scanner-cli \
                                 -Dsonar.projectKey=curso-devops-lab3 \
                                 -Dsonar.sources=. \
-                                -Dsonar.working.directory=/tmp/.scannerwork \
-                                -Dsonar.scanner.metadataFilePath=/usr/src/.scannerwork/report-task.txt
+                                -Dsonar.working.directory=/tmp/.scannerwork
                             """
+                            
+                            // 2. Extraemos el archivo que Jenkins necesita manualmente del contenedor
+                            sh "mkdir -p .scannerwork"
+                            sh "docker cp sonar_scanner_tmp:/tmp/.scannerwork/report-task.txt .scannerwork/report-task.txt"
+                            
+                            // 3. Limpiamos el contenedor temporal
+                            sh "docker rm -f sonar_scanner_tmp"
                         }
                     }
                 }
