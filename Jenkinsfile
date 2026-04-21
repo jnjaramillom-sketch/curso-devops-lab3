@@ -55,8 +55,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Aseguramos que la carpeta exista con permisos correctos antes de empezar
-                    sh "mkdir -p .scannerwork && chmod 777 .scannerwork"
+                    // Limpiamos cualquier rastro anterior desde el host
+                    sh "rm -rf .scannerwork && mkdir -p .scannerwork && chmod 777 .scannerwork"
                     
                     withSonarQubeEnv('sonar-server') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -68,7 +68,8 @@ pipeline {
                                 sonarsource/sonar-scanner-cli \
                                 -Dsonar.projectKey=curso-devops-lab3 \
                                 -Dsonar.sources=. \
-                                -Dsonar.working.directory=/usr/src/.scannerwork
+                                -Dsonar.working.directory=/tmp/.scannerwork \
+                                -Dsonar.scanner.metadataFilePath=/usr/src/.scannerwork/report-task.txt
                             """
                         }
                     }
