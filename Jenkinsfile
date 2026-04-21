@@ -134,15 +134,13 @@ pipeline {
             agent {
                 docker {
                     image 'bitnami/kubectl:latest'
-                    // Mounting the kubeconfig updated with the WSL IP
-                    args '--user 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
+                    // Added --entrypoint='' to allow Jenkins to control the container
+                    args '--entrypoint="" --user 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
                 }
             }
             steps {
-                script {
-                    // Using version 1.0.51 from your successful build
-                    sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.51 -n jjaramillo"
-                }
+                // Updated to version 1.0.52 as seen in your logs
+                sh "kubectl --insecure-skip-tls-verify set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.52 -n jjaramillo"
             }
         }
     }
