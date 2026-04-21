@@ -1,15 +1,16 @@
-# Etapa 1: build
+# -------- STAGE 1: BUILD --------
 FROM node:18 AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 RUN npm run build
 
-# Etapa 2: producción
+
+# -------- STAGE 2: RUNTIME --------
 FROM node:18-alpine
 
 WORKDIR /app
