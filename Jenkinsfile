@@ -134,11 +134,13 @@ pipeline {
             agent {
                 docker {
                     image 'bitnami/kubectl:latest'
-                    args '-u 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
+                    // Añadimos --entrypoint='' para permitir que Jenkins ejecute sus scripts
+                    args '-u 0 --entrypoint="" --network host -v /home/jjaramillo/.kube:/root/.kube'
                 }
             }
             steps {
-                sh 'kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${BUILD_NUMBER} -n jjaramillo'
+                // Asegúrate de usar comillas dobles para que las variables de Jenkins se expandan
+                sh "kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:1.0.49 -n jjaramillo"
             }
         }
     }
