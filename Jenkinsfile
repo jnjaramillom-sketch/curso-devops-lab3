@@ -55,6 +55,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
+                    sh "docker rm -f sonar_scanner_tmp || true"
+                    
                     withSonarQubeEnv('sonar-server') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
@@ -69,9 +71,13 @@ pipeline {
                             '''
                             sh "mkdir -p .scannerwork"
                             sh "docker cp sonar_scanner_tmp:/tmp/.scannerwork/report-task.txt .scannerwork/report-task.txt"
-                            sh "docker rm -f sonar_scanner_tmp"
                         }
                     }
+                }
+            }
+            post {
+                always {
+                    sh "docker rm -f sonar_scanner_tmp || true"
                 }
             }
         }
