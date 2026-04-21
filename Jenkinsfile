@@ -53,22 +53,24 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-                    steps {
-                        withSonarQubeEnv('sonar-server') {
-                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                                sh """
-                                docker run --rm \
-                                    -e SONAR_HOST_URL=http://host.docker.internal:9000 \
-                                    -e SONAR_TOKEN=$SONAR_TOKEN \
-                                    -v ${WORKSPACE}:/usr/src \
-                                    sonarsource/sonar-scanner-cli \
-                                    -Dsonar.projectKey=curso-devops-lab3 \
-                                    -Dsonar.sources=.
-                                """
-                            }
-                        }
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                        docker run --rm \
+                            --user \$(id -u):\$(id -g) \
+                            -e SONAR_HOST_URL=http://host.docker.internal:9000 \
+                            -e SONAR_TOKEN=$SONAR_TOKEN \
+                            -v ${WORKSPACE}:/usr/src \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.projectKey=curso-devops-lab3 \
+                            -Dsonar.sources=. \
+                            -Dsonar.working.directory=/usr/src/.scannerwork
+                        """
                     }
                 }
+            }
+        }
 
         stage('Quality Gate') {
             steps {
