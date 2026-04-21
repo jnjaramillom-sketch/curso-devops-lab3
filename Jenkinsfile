@@ -14,49 +14,25 @@ pipeline {
             }
         }
 
-        // Usamos el agente Docker nativo para Node.js
-        // Esto monta automáticamente el workspace correctamente
         stage('Install dependencies') {
-            agent {
-                docker {
-                    image 'node:20'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'npm install'
-            }
+            agent { docker { image 'node:20'; reuseNode true } }
+            steps { sh 'npm install' }
         }
 
         stage('Build') {
-            agent {
-                docker {
-                    image 'node:20'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'npm run build'
-            }
+            agent { docker { image 'node:20'; reuseNode true } }
+            steps { sh 'npm run build' }
         }
 
         stage('Test') {
-            agent {
-                docker {
-                    image 'node:20'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'npm test || true'
-            }
+            agent { docker { image 'node:20'; reuseNode true } }
+            steps { sh 'npm test || true' }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 script {
                     sh "docker rm -f sonar_scanner_tmp || true"
-                    
                     withSonarQubeEnv('sonar-server') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
@@ -75,17 +51,12 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
-                    sh "docker rm -f sonar_scanner_tmp || true"
-                }
-            }
+            post { always { sh "docker rm -f sonar_scanner_tmp || true" } }
         }
 
         stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    // Jenkins usará la URL que configuramos arriba para preguntar el estado
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -93,20 +64,13 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh """
-                docker build -t $DOCKER_HUB:latest \
-                             -t $DOCKER_HUB:$VERSION .
-                """
+                sh "docker build -t $DOCKER_HUB:latest -t $DOCKER_HUB:$VERSION ."
             }
         }
 
         stage('Push Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                     echo $PASS | docker login -u $USER --password-stdin
                     docker push $DOCKER_HUB:latest
@@ -131,24 +95,29 @@ pipeline {
         }
 
         stage('Deploy Kubernetes') {
-            agent {
-                docker {
-                    image 'bitnami/kubectl:latest'
-                    // Añadimos --add-host para que el contenedor sepa quién es host.docker.internal
-                    args "--entrypoint='' --user 0 --network host --add-host=host.docker.internal:host-gateway -v /home/jjaramillo/.kube:/root/.kube"
-                }
-            }
             steps {
                 script {
-                    // 1. Forzamos a que use el archivo config que montamos
-                    env.KUBECONFIG = '/root/.kube/config'
-
-                    // 2. Re-apuntamos al puerto que obtuviste (55593) usando la URL de Docker Desktop
-                    sh "kubectl config set-cluster docker-desktop --server=https://host.docker.internal:55593 --insecure-skip-tls-verify"
+                    // Ejecutamos kubectl a través de un contenedor efímero para no ensuciar el Jenkins
+                    // Compartimos el .kube config y el workspace para acceder al kubernetes.yaml
+                    sh """
+                    docker run --rm \
+                        -v /home/jjaramillo/.kube:/root/.kube \
+                        -v ${WORKSPACE}:/app \
+                        -w /app \
+                        --network host \
+                        --add-host=host.docker.internal:host-gateway \
+                        bitnami/kubectl:latest \
+                        --insecure-skip-tls-verify \
+                        apply -f kubernetes.yaml
                     
-                    // 3. Verificamos contexto y ejecutamos
-                    sh 'kubectl config current-context'
-                    sh "kubectl set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo"
+                    docker run --rm \
+                        -v /home/jjaramillo/.kube:/root/.kube \
+                        --network host \
+                        --add-host=host.docker.internal:host-gateway \
+                        bitnami/kubectl:latest \
+                        --insecure-skip-tls-verify \
+                        set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo
+                    """
                 }
             }
         }
