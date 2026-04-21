@@ -131,12 +131,14 @@ pipeline {
         }
 
         stage('Deploy Kubernetes') {
+            agent {
+                docker {
+                    image 'bitnami/kubectl:latest'
+                    args '-u 0 --network host -v /home/jjaramillo/.kube:/root/.kube'
+                }
+            }
             steps {
-                // Asegúrate de que el agente tenga configurado el kubeconfig
-                sh """
-                kubectl set image deployment/app-deployment \
-                app=$GHCR:$VERSION -n jjaramillo
-                """
+                sh 'kubectl set image deployment/app-deployment app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${BUILD_NUMBER} -n jjaramillo'
             }
         }
     }
