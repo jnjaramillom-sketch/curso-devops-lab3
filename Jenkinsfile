@@ -8,11 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/jnjaramillom-sketch/curso-devops-lab3'
-            }
-        }
+        Declarative: Checkout SCM
 
         stage('Install') {
             steps {
