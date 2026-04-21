@@ -8,45 +8,47 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
+        // Usamos el agente Docker nativo para Node.js
+        // Esto monta automáticamente el workspace correctamente
         stage('Install dependencies') {
-            steps {
-                dir("${env.WORKSPACE}") {
-                    sh """
-                    docker run --rm \
-                    -v \$(pwd):/app \
-                    -w /app \
-                    node:20 npm install
-                    """
+            agent {
+                docker {
+                    image 'node:20'
+                    reuseNode true
                 }
+            }
+            steps {
+                sh 'npm install'
             }
         }
 
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:20'
+                    reuseNode true
+                }
+            }
             steps {
-                sh """
-                docker run --rm \
-                    -v $PWD:/app \
-                    -w /app \
-                    node:20 npm run build
-                """
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
+            agent {
+                docker {
+                    image 'node:20'
+                    reuseNode true
+                }
+            }
             steps {
-                sh """
-                docker run --rm \
-                    -v $PWD:/app \
-                    -w /app \
-                    node:20 npm test || true
-                """
+                sh 'npm test || true'
             }
         }
 
@@ -54,6 +56,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        // Asegúrate de que sonar-scanner esté instalado en el Jenkins Agent
                         sh """
                         sonar-scanner \
                         -Dsonar.projectKey=curso-devops-lab3 \
@@ -104,10 +107,8 @@ pipeline {
                 withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
                     sh """
                     echo $TOKEN | docker login ghcr.io -u jnjaramillom-sketch --password-stdin
-
                     docker tag $DOCKER_HUB:latest $GHCR:latest
                     docker tag $DOCKER_HUB:$VERSION $GHCR:$VERSION
-
                     docker push $GHCR:latest
                     docker push $GHCR:$VERSION
                     """
@@ -117,6 +118,7 @@ pipeline {
 
         stage('Deploy Kubernetes') {
             steps {
+                // Asegúrate de que el agente tenga configurado el kubeconfig
                 sh """
                 kubectl set image deployment/app-deployment \
                 app=$GHCR:$VERSION -n jjaramillo
