@@ -131,18 +131,24 @@ pipeline {
         }
 
         stage('Deploy Kubernetes') {
-                    agent {
-                        docker {
-                            image 'bitnami/kubectl:latest'
-                            // Añadimos --entrypoint='' para que Jenkins pueda manejar el contenedor
-                            args "--entrypoint='' --user 0 --network host --add-host=host.docker.internal:host-gateway -v /home/jjaramillo/.kube:/root/.kube"
-                        }
-                    }
-                    steps {
-                        // Ahora los comandos sh funcionarán correctamente
-                        sh 'kubectl cluster-info' 
-                        sh "kubectl set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo"
-                    }
+            agent {
+                docker {
+                    image 'bitnami/kubectl:latest'
+                    args "--entrypoint='' --user 0 --network host --add-host=host.docker.internal:host-gateway -v /home/jjaramillo/.kube:/root/.kube"
                 }
+            }
+            steps {
+                script {
+                    // Configuramos el acceso usando TU puerto específico: 55593
+                    sh "kubectl config set-cluster lab-cluster --server=https://host.docker.internal:55593 --insecure-skip-tls-verify"
+                    sh "kubectl config set-context lab-context --cluster=lab-cluster"
+                    sh "kubectl config use-context lab-context"
+
+                    // Verificamos conexión y desplegamos
+                    sh 'kubectl cluster-info' 
+                    sh "kubectl set image deployment/app-deployment app=$GHCR:${VERSION} -n jjaramillo"
+                }
+            }
+        }
     }
 }
