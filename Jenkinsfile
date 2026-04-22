@@ -97,27 +97,11 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    // 1. Aplicamos el YAML desactivando la validación de OpenAPI
-                    sh """
-                    cat kubernetes.yaml | docker run --rm -i \
-                        -v /home/jjaramillo/.kube:/root/.kube \
-                        --network host \
-                        --add-host=host.docker.internal:host-gateway \
-                        bitnami/kubectl:latest \
-                        --insecure-skip-tls-verify \
-                        apply --validate=false -f -
-                    """
-
-                    // 2. Actualizamos la imagen
-                    sh """
-                    docker run --rm \
-                        -v /home/jjaramillo/.kube:/root/.kube \
-                        --network host \
-                        --add-host=host.docker.internal:host-gateway \
-                        bitnami/kubectl:latest \
-                        --insecure-skip-tls-verify \
-                        set image deployment/app-deployment app=${GHCR}:${VERSION} -n jjaramillo
-                    """
+                    // Aplicar cambios generales
+                    sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube -v \$(pwd):/app -w /app bitnami/kubectl:latest --insecure-skip-tls-verify apply -f kubernetes.yaml"
+                    
+                    // Objetivo 1.h: Actualizar el deployment con el build number específico
+                    sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube bitnami/kubectl:latest --insecure-skip-tls-verify set image deployment/app-deployment app-container=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${env.BUILD_NUMBER} -n jjaramillo"
                 }
             }
         }
