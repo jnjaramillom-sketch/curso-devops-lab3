@@ -114,19 +114,27 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    echo "=== WORKSPACE ==="
+                    echo $WORKSPACE
+                    ls -la $WORKSPACE
+
+                    echo "=== VALIDANDO CONTENEDOR ==="
                     docker run --rm \
-                    -v /home/jjaramillo/.kube:/root/.kube \
-                    -v $WORKSPACE:/app \
+                    --entrypoint /bin/sh \
+                    -v /root/.kube:/root/.kube \
+                    -v "$WORKSPACE":/app \
                     -w /app \
                     bitnami/kubectl:latest \
-                    --insecure-skip-tls-verify apply -f kubernetes.yaml
-                    '''
+                    -c "pwd && ls -la /app"
 
-                    sh '''
+                    echo "=== DEPLOY ==="
                     docker run --rm \
-                    -v /home/jjaramillo/.kube:/root/.kube \
+                    -v /root/.kube:/root/.kube \
+                    -v "$WORKSPACE":/app \
+                    -w /app \
                     bitnami/kubectl:latest \
-                    --insecure-skip-tls-verify set image deployment/curso-devops app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${BUILD_NUMBER}
+                    --insecure-skip-tls-verify \
+                    apply -f /app/kubernetes.yaml
                     '''
                 }
             }
