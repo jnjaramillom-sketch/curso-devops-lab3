@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -51,7 +52,11 @@ pipeline {
                     }
                 }
             }
-            post { always { sh "docker rm -f sonar_scanner_tmp || true" } }
+            post {
+                always {
+                    sh "docker rm -f sonar_scanner_tmp || true"
+                }
+            }
         }
 
         stage("Quality Gate") {
@@ -71,11 +76,11 @@ pipeline {
         stage('Push Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
+                    sh '''
                     echo $PASS | docker login -u $USER --password-stdin
                     docker push $DOCKER_HUB:latest
                     docker push $DOCKER_HUB:$VERSION
-                    """
+                    '''
                 }
             }
         }
@@ -83,31 +88,47 @@ pipeline {
         stage('Push GHCR') {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
-                    sh """
+                    sh '''
                     echo $TOKEN | docker login ghcr.io -u jnjaramillom-sketch --password-stdin
                     docker tag $DOCKER_HUB:latest $GHCR:latest
                     docker tag $DOCKER_HUB:$VERSION $GHCR:$VERSION
                     docker push $GHCR:latest
                     docker push $GHCR:$VERSION
-                    """
+                    '''
                 }
+            }
+        }
+
+        stage('Debug files') {
+            steps {
+                sh '''
+                echo "=== WORKSPACE ==="
+                pwd
+                echo "=== FILES ==="
+                ls -la
+                '''
             }
         }
 
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    // Aplicar cambios generales
-                    sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube -v \$(pwd):/app -w /app bitnami/kubectl:latest --insecure-skip-tls-verify apply -f kubernetes.yaml"
-                    
-                    // Objetivo 1.h: Actualizar el deployment con el build number específico
-                    sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube bitnami/kubectl:latest --insecure-skip-tls-verify set image deployment/app-deployment app-container=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${env.BUILD_NUMBER} -n jjaramillo"
+                    sh '''
+                    docker run --rm \
+                    -v /home/jjaramillo/.kube:/root/.kube \
+                    -v $(pwd):/app \
+                    -w /app \
+                    bitnami/kubectl:latest \
+                    --insecure-skip-tls-verify apply -f kubernetes.yaml
+                    '''
+
+                    sh '''
+                    docker run --rm \
+                    -v /home/jjaramillo/.kube:/root/.kube \
+                    bitnami/kubectl:latest \
+                    --insecure-skip-tls-verify set image deployment/curso-devops app=ghcr.io/jnjaramillom-sketch/curso-devops-lab3:${BUILD_NUMBER}
+                    '''
                 }
-            }
-        }
-        stage('Debug files') {
-            steps {
-                sh 'ls -la'
             }
         }
     }
