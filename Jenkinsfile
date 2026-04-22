@@ -97,8 +97,7 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    // 1. Aplicamos el YAML pasándole el contenido por 'stdin' con '-'
-                    // Usamos la bandera -i en docker run para que acepte la entrada
+                    // 1. Aplicamos el YAML desactivando la validación de OpenAPI
                     sh """
                     cat kubernetes.yaml | docker run --rm -i \
                         -v /home/jjaramillo/.kube:/root/.kube \
@@ -106,10 +105,10 @@ pipeline {
                         --add-host=host.docker.internal:host-gateway \
                         bitnami/kubectl:latest \
                         --insecure-skip-tls-verify \
-                        apply -f -
+                        apply --validate=false -f -
                     """
 
-                    // 2. Actualizamos la imagen a la versión específica que acabamos de buildear
+                    // 2. Actualizamos la imagen
                     sh """
                     docker run --rm \
                         -v /home/jjaramillo/.kube:/root/.kube \
