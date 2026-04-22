@@ -116,7 +116,7 @@ pipeline {
                     sh '''
                     docker run --rm \
                     -v /home/jjaramillo/.kube:/root/.kube \
-                    -v $(pwd):/app \
+                    -v $WORKSPACE:/app \
                     -w /app \
                     bitnami/kubectl:latest \
                     --insecure-skip-tls-verify apply -f kubernetes.yaml
