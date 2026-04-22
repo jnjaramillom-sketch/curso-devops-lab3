@@ -16,18 +16,36 @@ pipeline {
         }
 
         stage('Install dependencies') {
-            agent { docker { image 'node:20'; reuseNode true } }
-            steps { sh 'npm install' }
+            steps {
+                sh '''
+                docker run --rm \
+                -v $WORKSPACE:/app \
+                -w /app \
+                node:20 npm install
+                '''
+            }
         }
 
         stage('Build') {
-            agent { docker { image 'node:20'; reuseNode true } }
-            steps { sh 'npm run build' }
+            steps {
+                sh '''
+                docker run --rm \
+                -v $WORKSPACE:/app \
+                -w /app \
+                node:20 npm run build
+                '''
+            }
         }
 
         stage('Test') {
-            agent { docker { image 'node:20'; reuseNode true } }
-            steps { sh 'npm test || true' }
+            steps {
+                sh '''
+                docker run --rm \
+                -v $WORKSPACE:/app \
+                -w /app \
+                node:20 npm test || true
+                '''
+            }
         }
 
         stage('SonarQube Analysis') {
