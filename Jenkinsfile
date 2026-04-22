@@ -109,14 +109,22 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Deploy Kubernetes') {
             steps {
                 script {
                     sh '''
+                    echo "=== WORKSPACE ==="
+                    echo $WORKSPACE
+                    ls -la $WORKSPACE
+
+                    echo "=== VALIDANDO ARCHIVO ==="
+                    ls -la $WORKSPACE/kubernetes.yaml
+
+                    echo "=== DEPLOY ==="
                     docker run --rm \
-                    -v /root/.kube:/root/.kube \
-                    -v /workspace:/app \
+                    -v /var/jenkins_home/.kube:/root/.kube \
+                    -v $WORKSPACE:/app \
                     -w /app \
                     bitnami/kubectl:latest \
                     --insecure-skip-tls-verify \
