@@ -109,35 +109,22 @@ pipeline {
                 '''
             }
         }
-
+        
         stage('Deploy Kubernetes') {
             steps {
                 script {
                     sh '''
-                    echo "=== WORKSPACE ==="
-                    echo $WORKSPACE
-                    ls -la $WORKSPACE
-
-                    echo "=== VALIDANDO CONTENEDOR ==="
-                    docker run --rm \
-                    --entrypoint /bin/sh \
-                    -v /root/.kube:/root/.kube \
-                    -v "$WORKSPACE":/app \
-                    -w /app \
-                    bitnami/kubectl:latest \
-                    -c "pwd && ls -la /app"
-
-                    echo "=== DEPLOY ==="
                     docker run --rm \
                     -v /root/.kube:/root/.kube \
-                    -v "$WORKSPACE":/app \
+                    -v /workspace:/app \
                     -w /app \
                     bitnami/kubectl:latest \
                     --insecure-skip-tls-verify \
-                    apply -f /app/kubernetes.yaml
+                    apply -f kubernetes.yaml
                     '''
                 }
             }
         }
+
     }
 }
