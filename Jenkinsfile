@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'built-in'
+            customWorkspace '/home/jjaramillo/projects/curso-devops-lab3'
+        }
+    }
 
     environment {
         DOCKER_HUB = "jnjaramillom/curso-devops-lab3"
@@ -8,9 +13,9 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
+                // Con customWorkspace definido arriba, checkout scm descargará todo aquí
                 checkout scm
             }
         }
@@ -19,7 +24,7 @@ pipeline {
             steps {
                 sh '''
                 docker run --rm \
-                -v $WORKSPACE:/app \
+                -v ${WORKSPACE}:/app \
                 -w /app \
                 node:20 npm install
                 '''
@@ -30,7 +35,7 @@ pipeline {
             steps {
                 sh '''
                 docker run --rm \
-                -v $WORKSPACE:/app \
+                -v ${WORKSPACE}:/app \
                 -w /app \
                 node:20 npm run build
                 '''
@@ -41,7 +46,7 @@ pipeline {
             steps {
                 sh '''
                 docker run --rm \
-                -v $WORKSPACE:/app \
+                -v ${WORKSPACE}:/app \
                 -w /app \
                 node:20 npm test || true
                 '''
@@ -65,7 +70,7 @@ pipeline {
                                 -Dsonar.working.directory=/tmp/.scannerwork
                             '''
                             sh "mkdir -p .scannerwork"
-                            sh "docker cp sonar_scanner_tmp:/tmp/.scannerwork/report-task.txt .scannerwork/report-task.txt"
+                            sh "docker cp sonar_scanner_tmp:/tmp/.scannerwork/report-task.txt .scannerwork/report-task.txt || true"
                         }
                     }
                 }
@@ -117,32 +122,13 @@ pipeline {
             }
         }
 
-        stage('Debug files') {
-            steps {
-                sh '''
-                echo "=== WORKSPACE ==="
-                pwd
-                echo "=== FILES ==="
-                ls -la
-                '''
-            }
-        }
-
         stage('Deploy Kubernetes') {
             steps {
                 script {
                     sh '''
-                    echo "=== WORKSPACE ==="
-                    echo $WORKSPACE
-                    ls -la $WORKSPACE
-
-                    echo "=== VALIDANDO ARCHIVO ==="
-                    ls -la $WORKSPACE/kubernetes.yaml
-
-                    echo "=== DEPLOY ==="
                     docker run --rm \
                     -v /var/jenkins_home/.kube:/root/.kube \
-                    -v $WORKSPACE:/app \
+                    -v ${WORKSPACE}:/app \
                     -w /app \
                     bitnami/kubectl:latest \
                     --insecure-skip-tls-verify \
@@ -151,6 +137,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
