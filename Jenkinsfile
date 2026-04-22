@@ -105,5 +105,10 @@ pipeline {
                 }
             }
         }
+        stage('Debug files') {
+            steps {
+                sh 'ls -la'
+            }
+        }
     }
 }
