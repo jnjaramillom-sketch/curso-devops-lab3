@@ -108,7 +108,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER}"
+                // Usamos una imagen liviana que ya tiene kubectl
+                sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube bitnami/kubectl:latest set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER}"
             }
         }
 
