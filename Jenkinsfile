@@ -108,11 +108,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                // Usamos una imagen liviana que ya tiene kubectl
-                sh "docker run --rm -v /home/jjaramillo/.kube:/root/.kube bitnami/kubectl:latest set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER}"
+                // Usamos una imagen de docker que ya trae kubectl
+                sh "docker run --rm -v /var/jenkins_home/.kube:/root/.kube bitnami/kubectl:latest set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:5"
             }
         }
-
         stage('Push GHCR') {
             steps {
                 withCredentials([string(credentialsId: 'github-token-lab', variable: 'TOKEN')]) {
