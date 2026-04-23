@@ -90,7 +90,8 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh "docker build -t $DOCKER_HUB:latest -t $DOCKER_HUB:$VERSION ."
+                // Usamos ${env.BUILD_NUMBER} para que coincida con el Push
+                sh "docker build -t jnjaramillom/curso-devops-lab3:latest -t jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER} ."
             }
         }
 
