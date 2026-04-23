@@ -124,14 +124,15 @@ pipeline {
         }
         stage('Push GHCR') {
             steps {
-                withCredentials([string(credentialsId: 'github-token-lab', variable: 'TOKEN')]) {
-                    sh '''
-                    echo $TOKEN | docker login ghcr.io -u jnjaramillom-sketch --password-stdin
-                    docker tag $DOCKER_HUB:latest $GHCR:latest
-                    docker tag $DOCKER_HUB:$VERSION $GHCR:$VERSION
-                    docker push $GHCR:latest
-                    docker push $GHCR:$VERSION
-                    '''
+                script {
+                    // Usamos usernamePassword porque así es como creaste la credencial en Jenkins
+                    withCredentials([usernamePassword(credentialsId: 'github-token-lab', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
+                        sh "echo \$GH_TOKEN | docker login ghcr.io -u \$GH_USER --password-stdin"
+                        sh "docker tag jnjaramillom/curso-devops-lab3:latest ghcr.io/\$GH_USER/curso-devops-lab3:latest"
+                        sh "docker tag jnjaramillom/curso-devops-lab3:latest ghcr.io/\$GH_USER/curso-devops-lab3:9"
+                        sh "docker push ghcr.io/\$GH_USER/curso-devops-lab3:latest"
+                        sh "docker push ghcr.io/\$GH_USER/curso-devops-lab3:9"
+                    }
                 }
             }
         }
