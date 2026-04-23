@@ -108,8 +108,16 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                // Usamos una imagen de docker que ya trae kubectl
-                sh "docker run --rm -v /var/jenkins_home/.kube:/root/.kube bitnami/kubectl:latest set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:5"
+                script {
+                    // Usamos la imagen de bitnami que ya tiene kubectl para no pelear con la instalación local
+                    sh """
+                    docker run --rm \
+                    --network devops-infra_default \
+                    -v /var/jenkins_home/.kube:/root/.kube \
+                    bitnami/kubectl:latest \
+                    set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:5
+                    """
+                }
             }
         }
         stage('Push GHCR') {
