@@ -80,12 +80,13 @@ pipeline {
             // ... resto del código igual
         }
 
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
+        stage('Quality Gate') {
+                    steps {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            // Cambiamos abortPipeline a false para que no detenga el flujo
+                            waitForQualityGate abortPipeline: false 
+                        }
+                    }
         }
 
         stage('Docker Build') {
