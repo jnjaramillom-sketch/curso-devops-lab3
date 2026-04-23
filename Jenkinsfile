@@ -58,13 +58,12 @@ pipeline {
             steps {
                 script {
                     sh "docker rm -f sonar_scanner_tmp || true"
-                    // Cambiado a 'SonarQube' para que coincida con tu sistema
                     withSonarQubeEnv("${SONAR_SERVER_NAME}") {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
                             docker run --name sonar_scanner_tmp \
-                                --network host \
-                                -e SONAR_HOST_URL=http://localhost:8084 \
+                                --network devops-infra_default \
+                                -e SONAR_HOST_URL=http://sonarqube:9000 \
                                 -e SONAR_TOKEN=${SONAR_TOKEN} \
                                 -v ${WORKSPACE}:/usr/src \
                                 sonarsource/sonar-scanner-cli \
@@ -78,11 +77,7 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
-                    sh "docker rm -f sonar_scanner_tmp || true"
-                }
-            }
+            // ... resto del código igual
         }
 
         stage("Quality Gate") {
