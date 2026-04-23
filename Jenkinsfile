@@ -10,12 +10,13 @@ pipeline {
         DOCKER_HUB = "jnjaramillom/curso-devops-lab3"
         GHCR = "ghcr.io/jnjaramillom-sketch/curso-devops-lab3"
         VERSION = "1.0.${BUILD_NUMBER}"
+        // Ajustamos el nombre al que configuraste en Jenkins
+        SONAR_SERVER_NAME = 'SonarQube' 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Con customWorkspace definido arriba, checkout scm descargará todo aquí
                 checkout scm
             }
         }
@@ -57,11 +58,13 @@ pipeline {
             steps {
                 script {
                     sh "docker rm -f sonar_scanner_tmp || true"
-                    withSonarQubeEnv('sonar-server') {
+                    // Cambiado a 'SonarQube' para que coincida con tu sistema
+                    withSonarQubeEnv("${SONAR_SERVER_NAME}") {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                             sh '''
                             docker run --name sonar_scanner_tmp \
-                                -e SONAR_HOST_URL=http://host.docker.internal:8084 \
+                                --network host \
+                                -e SONAR_HOST_URL=http://localhost:8084 \
                                 -e SONAR_TOKEN=${SONAR_TOKEN} \
                                 -v ${WORKSPACE}:/usr/src \
                                 sonarsource/sonar-scanner-cli \
@@ -98,6 +101,7 @@ pipeline {
 
         stage('Push Docker Hub') {
             steps {
+                // Asegúrate de crear la credencial 'dockerhub' en Jenkins
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
@@ -110,7 +114,8 @@ pipeline {
 
         stage('Push GHCR') {
             steps {
-                withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
+                // Asegúrate de crear la credencial 'github-token-lab' en Jenkins (Secret Text)
+                withCredentials([string(credentialsId: 'github-token-lab', variable: 'TOKEN')]) {
                     sh '''
                     echo $TOKEN | docker login ghcr.io -u jnjaramillom-sketch --password-stdin
                     docker tag $DOCKER_HUB:latest $GHCR:latest
