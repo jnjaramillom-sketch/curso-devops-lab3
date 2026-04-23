@@ -109,13 +109,15 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Usamos la imagen de bitnami que ya tiene kubectl para no pelear con la instalación local
                     sh """
                     docker run --rm \
                     --network devops-infra_default \
+                    --add-host=host.docker.internal:host-gateway \
                     -v /var/jenkins_home/.kube:/root/.kube \
                     bitnami/kubectl:latest \
-                    set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:5
+                    --kubeconfig=/root/.kube/config \
+                    --insecure-skip-tls-verify=true \
+                    set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:8
                     """
                 }
             }
