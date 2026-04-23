@@ -96,20 +96,23 @@ pipeline {
 
         stage('Push Docker Hub') {
             steps {
-                // Asegúrate de crear la credencial 'dockerhub' en Jenkins
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push $DOCKER_HUB:latest
-                    docker push $DOCKER_HUB:$VERSION
-                    '''
+                script {
+                    // Este 'dockerhub' debe ser igual al ID que pusiste en la configuración
+                    docker.withRegistry('', 'dockerhub') {
+                        sh "docker push jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER}"
+                    }
                 }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh "kubectl set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:${env.BUILD_NUMBER}"
             }
         }
 
         stage('Push GHCR') {
             steps {
-                // Asegúrate de crear la credencial 'github-token-lab' en Jenkins (Secret Text)
                 withCredentials([string(credentialsId: 'github-token-lab', variable: 'TOKEN')]) {
                     sh '''
                     echo $TOKEN | docker login ghcr.io -u jnjaramillom-sketch --password-stdin
