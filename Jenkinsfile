@@ -140,15 +140,18 @@ pipeline {
         stage('Deploy Kubernetes') {
             steps {
                 script {
-                    sh '''
+                    sh """
                     docker run --rm \
+                    --network devops-infra_default \
+                    --add-host=host.docker.internal:host-gateway \
                     -v /var/jenkins_home/.kube:/root/.kube \
-                    -v ${WORKSPACE}:/app \
+                    -v /home/jjaramillo/projects/curso-devops-lab3:/app \
                     -w /app \
                     bitnami/kubectl:latest \
-                    --insecure-skip-tls-verify \
+                    --kubeconfig=/root/.kube/config \
+                    --insecure-skip-tls-verify=true \
                     apply -f kubernetes.yaml
-                    '''
+                    """
                 }
             }
         }
