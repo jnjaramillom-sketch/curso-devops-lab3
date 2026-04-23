@@ -84,7 +84,7 @@ pipeline {
                     steps {
                         timeout(time: 5, unit: 'MINUTES') {
                             // Cambiamos abortPipeline a false para que no detenga el flujo
-                            waitForQualityGate abortPipeline: false 
+                            waitForQualityGate abortPipeline: true 
                         }
                     }
         }

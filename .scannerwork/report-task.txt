@@ -1,0 +1,6 @@
+projectKey=curso-devops-lab3
+serverUrl=http://host.docker.internal:8084
+serverVersion=26.3.0.120487
+dashboardUrl=http://host.docker.internal:8084/dashboard?id=curso-devops-lab3
+ceTaskId=5d338f04-6660-4605-875b-3892b9f95bf4
+ceTaskUrl=http://host.docker.internal:8084/api/ce/task?id=5d338f04-6660-4605-875b-3892b9f95bf4

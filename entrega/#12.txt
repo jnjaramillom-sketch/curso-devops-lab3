@@ -1,0 +1,839 @@
+Started by user unknown or anonymous
+Obtained Jenkinsfile from git https://github.com/jnjaramillom-sketch/curso-devops-lab3
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/Laboratorio-DevOps-3
+[Pipeline] {
+[Pipeline] ws
+Running in /home/jjaramillo/projects/curso-devops-lab3
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github-token-lab
+ > git rev-parse --resolve-git-dir /home/jjaramillo/projects/curso-devops-lab3/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/jnjaramillom-sketch/curso-devops-lab3 # timeout=10
+Fetching upstream changes from https://github.com/jnjaramillom-sketch/curso-devops-lab3
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials Token de acceso para Laboratorio DevOps
+ > git fetch --tags --force --progress -- https://github.com/jnjaramillom-sketch/curso-devops-lab3 +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision a378d50bceafbe0c23361c345e5d3650643c854b (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f a378d50bceafbe0c23361c345e5d3650643c854b # timeout=10
+Commit message: "Versión n°8"
+ > git rev-list --no-walk acdb11c1a4acc85c58ace4f756015a06bec4c02f # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github-token-lab
+ > git rev-parse --resolve-git-dir /home/jjaramillo/projects/curso-devops-lab3/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/jnjaramillom-sketch/curso-devops-lab3 # timeout=10
+Fetching upstream changes from https://github.com/jnjaramillom-sketch/curso-devops-lab3
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+using GIT_ASKPASS to set credentials Token de acceso para Laboratorio DevOps
+ > git fetch --tags --force --progress -- https://github.com/jnjaramillom-sketch/curso-devops-lab3 +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision a378d50bceafbe0c23361c345e5d3650643c854b (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f a378d50bceafbe0c23361c345e5d3650643c854b # timeout=10
+Commit message: "Versión n°8"
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Install dependencies)
+[Pipeline] sh
++ docker run --rm -v /home/jjaramillo/projects/curso-devops-lab3:/app -w /app node:20 npm install
+
+up to date, audited 689 packages in 2s
+
+144 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.13.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+npm notice To update run: npm install -g npm@11.13.0
+npm notice
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] sh
++ docker run --rm -v /home/jjaramillo/projects/curso-devops-lab3:/app -w /app node:20 npm run build
+
+> curso-devops-lab3@0.0.1 build
+> nest build
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.13.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+npm notice To update run: npm install -g npm@11.13.0
+npm notice
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] sh
++ docker run --rm -v /home/jjaramillo/projects/curso-devops-lab3:/app -w /app node:20 npm test
+
+> curso-devops-lab3@0.0.1 test
+> jest
+
+PASS src/app.controller.spec.ts
+  AppController
+    root
+      ✓ should return "Hello World!" (11 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        0.771 s
+Ran all test suites.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.13.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0
+npm notice To update run: npm install -g npm@11.13.0
+npm notice
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (SonarQube Analysis)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker rm -f sonar_scanner_tmp
+sonar_scanner_tmp
+[Pipeline] withSonarQubeEnv
+Injecting SonarQube environment variables using the configuration: SonarQube
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of $SONAR_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ docker run --name sonar_scanner_tmp --network devops-infra_default -e SONAR_HOST_URL=http://sonarqube:9000 -e SONAR_TOKEN=**** -v /home/jjaramillo/projects/curso-devops-lab3:/usr/src sonarsource/sonar-scanner-cli -Dsonar.projectKey=curso-devops-lab3 -Dsonar.sources=. -Dsonar.working.directory=/tmp/.scannerwork
+03:33:13.115 WARN  Property 'sonar.working.directory' with value '/tmp/.scannerwork' is overridden with value '/tmp/.scannerwork'
+03:33:13.127 INFO  Scanner configuration file: /opt/sonar-scanner/conf/sonar-scanner.properties
+03:33:13.128 INFO  Project root configuration file: /usr/src/sonar-project.properties
+03:33:13.145 INFO  SonarScanner CLI 8.0.1.6346
+03:33:13.151 INFO  Linux 6.6.87.2-microsoft-standard-WSL2 amd64
+03:33:14.456 INFO  Communicating with SonarQube Community Build 26.4.0.121862
+03:33:14.457 INFO  JRE provisioning: os[linux], arch[x86_64]
+03:33:16.621 INFO  Starting SonarScanner Engine...
+03:33:16.622 INFO  Java 21.0.9 Eclipse Adoptium (64-bit)
+03:33:18.055 INFO  Load global settings
+03:33:18.183 INFO  Load global settings (done) | time=128ms
+03:33:18.188 INFO  Server id: D1BE41C1-AZ23RymIxkp0eU-yvKe-
+03:33:18.207 INFO  Loading required plugins
+03:33:18.208 INFO  Load plugins index
+03:33:18.230 INFO  Load plugins index (done) | time=22ms
+03:33:18.231 INFO  Load/download plugins
+03:33:19.061 INFO  Load/download plugins (done) | time=830ms
+03:33:19.395 INFO  Process project properties
+03:33:19.407 INFO  Process project properties (done) | time=13ms
+03:33:19.420 INFO  Project key: curso-devops-lab3
+03:33:19.420 INFO  Base dir: /usr/src
+03:33:19.421 INFO  Working dir: /tmp/.scannerwork
+03:33:19.431 INFO  Load project settings for component key: 'curso-devops-lab3'
+03:33:19.531 INFO  Load project settings for component key: 'curso-devops-lab3' (done) | time=100ms
+03:33:19.586 INFO  Load quality profiles
+03:33:19.670 INFO  Load quality profiles (done) | time=84ms
+03:33:19.725 INFO  Load active rules
+03:33:20.047 INFO  Load active rules (done) | time=323ms
+03:33:20.059 INFO  Load analysis cache
+03:33:20.074 INFO  Load analysis cache (6.5 kB) | time=15ms
+03:33:20.263 INFO  Preprocessing files...
+03:33:21.007 WARN  File '/usr/src/kubectl' is bigger than 20MB and as consequence is removed from the analysis scope.
+03:33:21.026 INFO  5 languages detected in 34 preprocessed files (done) | time=762ms
+03:33:21.027 INFO  26301 files ignored because of scm ignore settings
+03:33:21.031 INFO  Loading plugins for detected languages
+03:33:21.032 INFO  Load/download plugins
+03:33:21.746 INFO  Load/download plugins (done) | time=714ms
+03:33:21.941 INFO  Load project repositories
+03:33:22.085 INFO  Load project repositories (done) | time=141ms
+03:33:22.115 INFO  Indexing files...
+03:33:22.116 INFO  Project configuration:
+03:33:22.139 INFO  34 files indexed (done) | time=16ms
+03:33:22.140 INFO  Quality profile for docker: Sonar way
+03:33:22.140 INFO  Quality profile for js: Sonar way
+03:33:22.140 INFO  Quality profile for json: Sonar way
+03:33:22.140 INFO  Quality profile for ts: Sonar way
+03:33:22.141 INFO  Quality profile for yaml: Sonar way
+03:33:22.141 INFO  ------------- Run sensors on module curso-devops-lab3
+03:33:22.183 INFO  Load metrics repository
+03:33:22.208 INFO  Load metrics repository (done) | time=25ms
+03:33:22.612 INFO  Reflections took 108 ms to scan 1 urls, producing 25 keys and 261 values
+03:33:22.773 INFO  Sensor IaC CloudFormation Sensor [iac]
+03:33:22.849 INFO  There are no files to be analyzed for the CloudFormation language
+03:33:22.850 INFO  Sensor IaC CloudFormation Sensor [iac] (done) | time=78ms
+03:33:22.851 INFO  Sensor IaC cfn-lint report Sensor [iac]
+03:33:22.851 INFO  Sensor IaC cfn-lint report Sensor [iac] (done) | time=1ms
+03:33:22.852 INFO  Sensor IaC Kustomization Sensor [iac]
+03:33:22.852 INFO  Sensor IaC Kustomization Sensor [iac] (done) | time=2ms
+03:33:22.853 INFO  Sensor IaC hadolint report Sensor [iac]
+03:33:22.853 INFO  Sensor IaC hadolint report Sensor [iac] (done) | time=0ms
+03:33:22.853 INFO  Sensor IaC Azure Resource Manager Sensor [iac]
+03:33:22.855 INFO  There are no files to be analyzed for the Azure Resource Manager language
+03:33:22.856 INFO  Sensor IaC Azure Resource Manager Sensor [iac] (done) | time=3ms
+03:33:22.856 INFO  Sensor Java Config Sensor [iac]
+03:33:22.861 INFO  There are no files to be analyzed for the Java language
+03:33:22.862 INFO  Sensor Java Config Sensor [iac] (done) | time=6ms
+03:33:22.862 INFO  Sensor IaC Docker Sensor [iac]
+03:33:22.936 INFO  3 source files to be analyzed
+03:33:23.071 WARN  Cannot parse 'Dockerfile-jenkins:Zone.Identifier:1:1'
+03:33:23.076 INFO  3/3 source files have been analyzed
+03:33:23.077 INFO  Sensor IaC Docker Sensor [iac] (done) | time=215ms
+03:33:23.077 INFO  Sensor HTML [web]
+03:33:23.081 INFO  Sensor HTML [web] (done) | time=3ms
+03:33:23.082 INFO  Sensor JavaScript/TypeScript/CSS analysis [javascript]
+03:33:23.359 INFO  Detected os: Linux arch: amd64 alpine: false. Platform: LINUX_X64
+03:33:23.360 INFO  Deploy location /opt/sonar-scanner/.sonar/js/node-runtime, tagetRuntime: /opt/sonar-scanner/.sonar/js/node-runtime/node,  version: /opt/sonar-scanner/.sonar/js/node-runtime/version.txt
+03:33:26.123 INFO  Using embedded Node.js runtime.
+03:33:26.123 INFO  Using Node.js executable: '/opt/sonar-scanner/.sonar/js/node-runtime/node'.
+03:33:28.350 INFO  Memory configuration: OS (7832 MB), Node.js (2240 MB).
+03:33:28.671 INFO  WebSocket client connected on /ws
+03:33:28.675 INFO  Plugin version: [12.3.0.39932]
+03:33:30.486 INFO  Found 1 tsconfig.json file(s): [/usr/src/tsconfig.json]
+03:33:33.188 INFO  13 source files to be analyzed
+03:33:33.188 INFO  Creating TypeScript(5.9.3) program with configuration file /usr/src/tsconfig.json [lib: lib.es2024.d.ts, lib.dom.d.ts]
+03:33:33.189 INFO  Analyzing 12 file(s) from tsconfig /usr/src/tsconfig.json (662 total files in program)
+03:33:33.189 INFO  Analyzing 1 file(s) using merged compiler options [lib: lib.es2024.d.ts, lib.dom.d.ts]
+03:33:33.189 INFO  13/13 source files have been analyzed
+03:33:33.198 INFO  Hit the cache for 0 out of 13
+03:33:33.198 INFO  Miss the cache for 13 out of 13: ANALYSIS_MODE_INELIGIBLE [13/13]
+03:33:33.198 INFO  Sensor JavaScript/TypeScript/CSS analysis [javascript] (done) | time=10117ms
+03:33:33.199 INFO  Sensor JavaScript/TypeScript Coverage [javascript]
+03:33:33.199 INFO  Analysing [/usr/src/coverage/lcov.info]
+03:33:33.214 INFO  Sensor JavaScript/TypeScript Coverage [javascript] (done) | time=16ms
+03:33:33.214 INFO  Sensor IaC Kubernetes Sensor [iac]
+03:33:33.346 INFO  1 source file to be parsed
+03:33:33.387 INFO  1/1 source file has been parsed
+03:33:33.387 INFO  1 source file to be analyzed
+03:33:33.399 INFO  1/1 source file has been analyzed
+03:33:33.400 INFO  1 source file to be checked
+03:33:33.418 INFO  1/1 source file has been checked
+03:33:33.419 INFO  Sensor IaC Kubernetes Sensor [iac] (done) | time=204ms
+03:33:33.419 INFO  Sensor TextAndSecretsSensor [text]
+03:33:33.452 INFO  Available processors: 8
+03:33:33.452 INFO  Using 8 threads for analysis.
+03:33:33.880 INFO  The property "sonar.tests" is not set. To improve the analysis accuracy, we categorize a file as a test file if any of the following is true:
+  * The filename starts with "test"
+  * The filename contains "test." or "tests."
+  * Any directory in the file path is named: "doc", "docs", "test", "tests", "mock" or "mocks"
+  * Any directory in the file path has a name ending in "test" or "tests"
+
+03:33:33.907 INFO  Start fetching files for the text and secrets analysis
+03:33:33.939 INFO  Using Git CLI to retrieve dirty files
+03:33:33.957 INFO  Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
+03:33:33.959 INFO  Starting the text and secrets analysis
+03:33:33.961 INFO  25 source files to be analyzed for the text and secrets analysis
+03:33:34.342 INFO  25/25 source files have been analyzed for the text and secrets analysis
+03:33:34.346 INFO  1 file is ignored because it is untracked by git or has been modified
+03:33:34.347 INFO  Sensor TextAndSecretsSensor [text] (done) | time=929ms
+03:33:34.358 INFO  ------------- Run sensors on project
+03:33:34.549 INFO  Sensor Zero Coverage Sensor
+03:33:34.560 INFO  Sensor Zero Coverage Sensor (done) | time=10ms
+03:33:34.560 INFO  ------------- Gather SCA dependencies on project
+03:33:34.567 INFO  Dependency analysis skipped
+03:33:34.580 INFO  CPD Executor 7 files had no CPD blocks
+03:33:34.581 INFO  CPD Executor Calculating CPD for 6 files
+03:33:34.590 INFO  CPD Executor CPD calculation finished (done) | time=9ms
+03:33:34.603 INFO  SCM revision ID 'a378d50bceafbe0c23361c345e5d3650643c854b'
+03:33:34.710 INFO  Analysis report generated in 109ms, dir size=295.5 kB
+03:33:34.746 INFO  Analysis report compressed in 35ms, zip size=61.3 kB
+03:33:34.793 INFO  Analysis report uploaded in 47ms
+03:33:34.796 INFO  ANALYSIS SUCCESSFUL, you can find the results at: http://sonarqube:9000/dashboard?id=curso-devops-lab3
+03:33:34.796 INFO  Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+03:33:34.796 INFO  More about the report processing at http://sonarqube:9000/api/ce/task?id=a1bb2703-a922-4774-bb50-e1b92c20c91a
+03:33:34.963 INFO  Analysis total time: 15.836 s
+03:33:34.965 INFO  SonarScanner Engine completed successfully
+03:33:35.084 INFO  EXECUTION SUCCESS
+03:33:35.086 INFO  Total time: 21.961s
+[Pipeline] sh
++ mkdir -p .scannerwork
+[Pipeline] sh
++ docker cp sonar_scanner_tmp:/tmp/.scannerwork/report-task.txt .scannerwork/report-task.txt
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withSonarQubeEnv
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Quality Gate)
+[Pipeline] timeout
+Timeout set to expire in 5 min 0 sec
+[Pipeline] {
+[Pipeline] waitForQualityGate
+Checking status of SonarQube task 'a1bb2703-a922-4774-bb50-e1b92c20c91a' on server 'SonarQube'
+SonarQube task 'a1bb2703-a922-4774-bb50-e1b92c20c91a' status is 'SUCCESS'
+SonarQube task 'a1bb2703-a922-4774-bb50-e1b92c20c91a' completed. Quality gate is 'OK'
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Build)
+[Pipeline] sh
++ docker build -t jnjaramillom/curso-devops-lab3:latest -t jnjaramillom/curso-devops-lab3:12 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 384B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:18
+#2 ...
+
+#3 [internal] load metadata for docker.io/library/node:18-alpine
+#3 DONE 2.1s
+
+#2 [internal] load metadata for docker.io/library/node:18
+#2 DONE 2.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [builder 1/6] FROM docker.io/library/node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d96c693a8a4d943498556716d3783
+#6 resolve docker.io/library/node:18@sha256:c6ae79e38498325db67193d391e6ec1d224d96c693a8a4d943498556716d3783 0.1s done
+#6 DONE 0.1s
+
+#7 [stage-1 1/5] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#7 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.1s done
+#7 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 23.53kB 0.0s done
+#5 DONE 0.0s
+
+#8 [builder 2/6] WORKDIR /app
+#8 CACHED
+
+#9 [builder 3/6] COPY package*.json ./
+#9 CACHED
+
+#10 [builder 4/6] RUN npm install
+#10 CACHED
+
+#11 [builder 5/6] COPY . .
+#11 DONE 0.1s
+
+#12 [builder 6/6] RUN npm run build
+#12 0.871 
+#12 0.871 > curso-devops-lab3@0.0.1 build
+#12 0.871 > nest build
+#12 0.871 
+#12 DONE 5.4s
+
+#13 [stage-1 3/5] COPY package*.json ./
+#13 CACHED
+
+#14 [stage-1 4/5] RUN npm ci --only=production
+#14 CACHED
+
+#15 [stage-1 2/5] WORKDIR /app
+#15 CACHED
+
+#16 [stage-1 5/5] COPY --from=builder /app/dist ./dist
+#16 CACHED
+
+#17 exporting to image
+#17 exporting layers done
+#17 exporting manifest sha256:9b383dc98c77a5a8877bd8ff897eaa0f4b427d083816b2be1dc3c1a2ccbbaaa1 done
+#17 exporting config sha256:e8e90a371860b2e09f59fd60c6963ae3c786e7b3f5616a407a7d1bfb2d1b2f7f done
+#17 exporting attestation manifest sha256:76662c4d575104f6b898500f448b853a6ed8337a4e1dee5aa888bb2e6d9f6bed 0.1s done
+#17 exporting manifest list sha256:ed48ce49185a7e6e0fa8d650c69bc8c9d780a3f0833ddd9c074f89aff7b6b0c5
+#17 exporting manifest list sha256:ed48ce49185a7e6e0fa8d650c69bc8c9d780a3f0833ddd9c074f89aff7b6b0c5 0.0s done
+#17 naming to docker.io/jnjaramillom/curso-devops-lab3:latest done
+#17 unpacking to docker.io/jnjaramillom/curso-devops-lab3:latest 0.0s done
+#17 naming to docker.io/jnjaramillom/curso-devops-lab3:12 done
+#17 unpacking to docker.io/jnjaramillom/curso-devops-lab3:12 0.0s done
+#17 DONE 0.3s
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push Docker Hub)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withDockerRegistry
+$ docker login -u jnjaramillom -p ******** https://index.docker.io/v1/
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+
+WARNING! Your credentials are stored unencrypted in '/home/jjaramillo/projects/curso-devops-lab3@tmp/02bb6395-947c-45ad-a4e1-30d28dde80f8/config.json'.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/go/credential-store/
+
+Login Succeeded
+[Pipeline] {
+[Pipeline] sh
++ docker push jnjaramillom/curso-devops-lab3:12
+The push refers to repository [docker.io/jnjaramillom/curso-devops-lab3]
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+f580dd0d1e29: Layer already exists
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+f18232174bc9: Layer already exists
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+763c65123eca: Layer already exists
+dd71dde834b5: Layer already exists
+5c075f39b4bb: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+25ff2da83641: Waiting
+5c075f39b4bb: Layer already exists
+8abf491194c2: Waiting
+1e5a4c89cee5: Layer already exists
+c5e7402c0b67: Layer already exists
+25ff2da83641: Layer already exists
+8abf491194c2: Waiting
+8abf491194c2: Waiting
+8abf491194c2: Pushed
+12: digest: sha256:ed48ce49185a7e6e0fa8d650c69bc8c9d780a3f0833ddd9c074f89aff7b6b0c5 size: 856
+[Pipeline] }
+[Pipeline] // withDockerRegistry
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy to Kubernetes)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker run --rm --network devops-infra_default --add-host=host.docker.internal:host-gateway -v /var/jenkins_home/.kube:/root/.kube bitnami/kubectl:latest --kubeconfig=/root/.kube/config --insecure-skip-tls-verify=true set image deployment/curso-devops app=jnjaramillom/curso-devops-lab3:8
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push GHCR)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] withCredentials
+Masking supported pattern matches of $GH_TOKEN
+[Pipeline] {
+[Pipeline] sh
++ echo ****
++ docker login ghcr.io -u jnjaramillom-sketch --password-stdin
+Login Succeeded
+[Pipeline] sh
++ docker tag jnjaramillom/curso-devops-lab3:latest ghcr.io/jnjaramillom-sketch/curso-devops-lab3:latest
+[Pipeline] sh
++ docker tag jnjaramillom/curso-devops-lab3:latest ghcr.io/jnjaramillom-sketch/curso-devops-lab3:9
+[Pipeline] sh
++ docker push ghcr.io/jnjaramillom-sketch/curso-devops-lab3:latest
+The push refers to repository [ghcr.io/jnjaramillom-sketch/curso-devops-lab3]
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Waiting
+5c075f39b4bb: Waiting
+1e5a4c89cee5: Waiting
+c5e7402c0b67: Waiting
+dd71dde834b5: Layer already exists
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Waiting
+763c65123eca: Layer already exists
+8abf491194c2: Waiting
+8abf491194c2: Waiting
+1e5a4c89cee5: Layer already exists
+c5e7402c0b67: Layer already exists
+5c075f39b4bb: Layer already exists
+f580dd0d1e29: Layer already exists
+f18232174bc9: Layer already exists
+25ff2da83641: Layer already exists
+8abf491194c2: Waiting
+8abf491194c2: Waiting
+8abf491194c2: Pushed
+latest: digest: sha256:ed48ce49185a7e6e0fa8d650c69bc8c9d780a3f0833ddd9c074f89aff7b6b0c5 size: 856
+[Pipeline] sh
++ docker push ghcr.io/jnjaramillom-sketch/curso-devops-lab3:9
+The push refers to repository [ghcr.io/jnjaramillom-sketch/curso-devops-lab3]
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+5c075f39b4bb: Layer already exists
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Waiting
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Waiting
+8abf491194c2: Waiting
+f580dd0d1e29: Waiting
+1e5a4c89cee5: Waiting
+dd71dde834b5: Waiting
+25ff2da83641: Waiting
+c5e7402c0b67: Layer already exists
+763c65123eca: Waiting
+f18232174bc9: Waiting
+8abf491194c2: Already exists
+f580dd0d1e29: Layer already exists
+1e5a4c89cee5: Layer already exists
+dd71dde834b5: Layer already exists
+25ff2da83641: Layer already exists
+763c65123eca: Layer already exists
+f18232174bc9: Layer already exists
+9: digest: sha256:ed48ce49185a7e6e0fa8d650c69bc8c9d780a3f0833ddd9c074f89aff7b6b0c5 size: 856
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy Kubernetes)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker run --rm --network devops-infra_default --add-host=host.docker.internal:host-gateway -v /var/jenkins_home/.kube:/root/.kube -v /home/jjaramillo/projects/curso-devops-lab3:/app -w /app bitnami/kubectl:latest --kubeconfig=/root/.kube/config --insecure-skip-tls-verify=true apply -f kubernetes.yaml
+deployment.apps/curso-devops configured
+service/curso-devops-service unchanged
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // ws
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
